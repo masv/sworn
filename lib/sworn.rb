@@ -1,3 +1,4 @@
+require "sworn/middleware"
 require "sworn/version"
 
 module Sworn
