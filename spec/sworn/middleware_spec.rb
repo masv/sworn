@@ -9,7 +9,7 @@ describe Sworn::Middleware do
   end
 
   def app
-    Sworn::Middleware.new dummy_app, :consumers => { "consumer" => "consumersecret" }
+    Sworn::Middleware.new dummy_app, :consumers => { "consumer" => "consumersecret" }, :access_tokens => { "token" => "tokensecret" }
   end
 
   it "returns 400 when signature is missing" do
@@ -22,8 +22,13 @@ describe Sworn::Middleware do
     last_response.status.must_equal 401
   end
 
-  it "returns 200 when signature is valid" do
+  it "returns 200 for valid consumer-only signature" do
     get "/", {}, { 'HTTP_AUTHORIZATION' => 'OAuth oauth_consumer_key="consumer", oauth_token="", oauth_nonce="5633141c5b", oauth_timestamp="1395680768", oauth_signature_method="HMAC-SHA1", oauth_version="1.0", oauth_signature="laa5+2VWj6vj7j/7+Gf4f2Pf2zc="' }
+    last_response.status.must_equal 200
+  end
+
+  it "returns 200 for valid consumer + access token signature" do
+    get "/", {}, { 'HTTP_AUTHORIZATION' => 'OAuth oauth_consumer_key="consumer", oauth_token="token", oauth_nonce="5633141c5b", oauth_timestamp="1395680768", oauth_signature_method="HMAC-SHA1", oauth_version="1.0", oauth_signature="2oWYAElGeFpeDKUY6rYu3s+mrKw="' }
     last_response.status.must_equal 200
   end
 end
