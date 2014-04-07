@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'rack/test'
+require 'simple_oauth'
 
 describe Sworn::Middleware do
   include Rack::Test::Methods
@@ -10,6 +11,17 @@ describe Sworn::Middleware do
 
   def app
     Sworn::Middleware.new dummy_app, :consumers => { "consumer" => "consumersecret" }, :access_tokens => { "token" => "tokensecret" }
+  end
+
+  def oauth_signature(options = {})
+    method = options.delete(:method) { "GET" }
+    url    = options.delete(:url) { "http://example.org/" }
+    params = options.delete(:params) { Hash.new }
+
+    options[:consumer_key]    ||= "consumer"
+    options[:consumer_secret] ||= "consumersecret"
+
+    SimpleOAuth::Header.new(method, url, params, options)
   end
 
   it "returns 400 when signature is missing" do
@@ -23,12 +35,12 @@ describe Sworn::Middleware do
   end
 
   it "returns 200 for valid consumer-only signature" do
-    get "/", {}, { 'HTTP_AUTHORIZATION' => 'OAuth oauth_consumer_key="consumer", oauth_token="", oauth_nonce="5633141c5b", oauth_timestamp="1395680768", oauth_signature_method="HMAC-SHA1", oauth_version="1.0", oauth_signature="laa5+2VWj6vj7j/7+Gf4f2Pf2zc="' }
+    get "/", {}, { 'HTTP_AUTHORIZATION' => oauth_signature }
     last_response.status.must_equal 200
   end
 
   it "returns 200 for valid consumer + access token signature" do
-    get "/", {}, { 'HTTP_AUTHORIZATION' => 'OAuth oauth_consumer_key="consumer", oauth_token="token", oauth_nonce="5633141c5b", oauth_timestamp="1395680768", oauth_signature_method="HMAC-SHA1", oauth_version="1.0", oauth_signature="2oWYAElGeFpeDKUY6rYu3s+mrKw="' }
+    get "/", {}, { 'HTTP_AUTHORIZATION' => oauth_signature(:token => "token", :token_secret => "tokensecret") }
     last_response.status.must_equal 200
   end
 end
