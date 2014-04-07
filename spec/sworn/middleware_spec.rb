@@ -10,7 +10,9 @@ describe Sworn::Middleware do
   end
 
   def app
-    Sworn::Middleware.new dummy_app, :consumers => { "consumer" => "consumersecret" }, :access_tokens => { "token" => "tokensecret" }
+    Sworn::Middleware.new dummy_app, :consumers => { "consumer" => "consumersecret" },
+                                     :access_tokens => { "token" => "tokensecret" },
+                                     :max_drift => 30 # seconds
   end
 
   def oauth_signature(options = {})
@@ -31,6 +33,11 @@ describe Sworn::Middleware do
 
   it "returns 401 when signature is invalid" do
     get "/", {}, { 'HTTP_AUTHORIZATION' => 'OAuth oauth_consumer_key="invalid", oauth_token="", oauth_nonce="abc", oauth_timestamp="123", oauth_signature_method="HMAC-SHA1", oauth_version="1.0", oauth_signature="nowayjose"' }
+    last_response.status.must_equal 401
+  end
+
+  it "returns 401 when signature timestamp is out of bounds" do
+    get "/", {}, { 'HTTP_AUTHORIZATION' => oauth_signature(:timestamp => (Time.now.to_i - 60).to_s) }
     last_response.status.must_equal 401
   end
 
