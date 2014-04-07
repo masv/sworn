@@ -44,11 +44,11 @@ module Sworn
     end
 
     def bad_request
-      [400, {}, []]
+      [400, {}, ["Bad request"]]
     end
 
     def not_authorized
-      [401, {}, []]
+      [401, {}, ["Not authorized"]]
     end
   end
 end
