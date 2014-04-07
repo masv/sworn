@@ -2,13 +2,14 @@ require "simple_oauth"
 
 module Sworn
   class Middleware
-    attr_reader :consumers, :access_tokens, :max_drift
+    attr_reader :consumers, :access_tokens, :max_drift, :replay_check
 
     def initialize(app, options = {})
       @app = app
       @consumers      = options.fetch(:consumers) { Hash.new }
       @access_tokens  = options.fetch(:access_tokens) { Hash.new }
       @max_drift      = options.fetch(:max_drift) { 30 }
+      @replay_check   = options.fetch(:replay_check) { lambda { |_| false } }
     end
 
     def call(env)
@@ -17,6 +18,7 @@ module Sworn
 
       return bad_request    if oauth.empty?
       return not_authorized if expired?(oauth)
+      return not_authorized if replayed?(oauth)
       return not_authorized unless valid?(oauth, request)
 
       return @app.call(env)
@@ -27,6 +29,10 @@ module Sworn
       now = Time.now.to_i
       window = (now - max_drift .. now + max_drift)
       !window.include?(timestamp)
+    end
+
+    def replayed?(oauth)
+      replay_check.call(oauth)
     end
 
     def valid?(oauth, request)

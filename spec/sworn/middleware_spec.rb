@@ -12,7 +12,13 @@ describe Sworn::Middleware do
   def app
     Sworn::Middleware.new dummy_app, :consumers => { "consumer" => "consumersecret" },
                                      :access_tokens => { "token" => "tokensecret" },
-                                     :max_drift => 30 # seconds
+                                     :max_drift => 30, # seconds
+                                     :replay_check => lambda { |oauth|
+                                       @store ||= Set.new
+                                       return true if @store.include?(oauth)
+                                       @store << oauth
+                                       false
+                                     }
   end
 
   def oauth_signature(options = {})
@@ -38,6 +44,14 @@ describe Sworn::Middleware do
 
   it "returns 401 when signature timestamp is out of bounds" do
     get "/", {}, { 'HTTP_AUTHORIZATION' => oauth_signature(:timestamp => (Time.now.to_i - 60).to_s) }
+    last_response.status.must_equal 401
+  end
+
+  it "returns 401 when signature is replayed" do
+    replayed = oauth_signature
+    get "/", {}, { 'HTTP_AUTHORIZATION' => replayed }
+    last_response.status.must_equal 200
+    get "/", {}, { 'HTTP_AUTHORIZATION' => replayed }
     last_response.status.must_equal 401
   end
 
