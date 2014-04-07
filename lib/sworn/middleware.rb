@@ -12,10 +12,15 @@ module Sworn
 
     def call(env)
       request = Rack::Request.new(env)
-
       oauth = SimpleOAuth::Header.parse(env['HTTP_AUTHORIZATION'])
-      return bad_request if oauth.empty?
 
+      return bad_request    if oauth.empty?
+      return not_authorized unless valid?(oauth, request)
+
+      return @app.call(env)
+    end
+
+    def valid?(oauth, request)
       consumer_key = oauth[:consumer_key]
       consumer_secret = consumers[consumer_key]
       access_token = oauth[:token]
@@ -27,10 +32,6 @@ module Sworn
         request.params,
         oauth
       ).valid?(:consumer_secret => consumer_secret, :token_secret => token_secret)
-
-      return not_authorized unless valid
-
-      return @app.call(env)
     end
 
     def bad_request
