@@ -2,14 +2,11 @@ require "simple_oauth"
 
 module Sworn
   class Middleware
-    attr_reader :consumers, :access_tokens, :max_drift, :replay_check
+    attr_reader :config
 
     def initialize(app, options = {})
       @app = app
-      @consumers      = options.fetch(:consumers) { Hash.new }
-      @access_tokens  = options.fetch(:access_tokens) { Hash.new }
-      @max_drift      = options.fetch(:max_drift) { 30 }
-      @replay_check   = options.fetch(:replay_check) { lambda { |_| false } }
+      @config = options.fetch(:config) { Sworn.configuration }
     end
 
     def call(env)
@@ -27,19 +24,19 @@ module Sworn
     def expired?(oauth)
       timestamp = oauth.fetch(:timestamp).to_i
       now = Time.now.to_i
-      window = (now - max_drift .. now + max_drift)
+      window = (now - config.max_drift .. now + config.max_drift)
       !window.include?(timestamp)
     end
 
     def replayed?(oauth)
-      replay_check.call(oauth)
+      config.replay_check.call(oauth)
     end
 
     def valid?(oauth, request)
       consumer_key = oauth[:consumer_key]
-      consumer_secret = consumers[consumer_key]
+      consumer_secret = config.consumers[consumer_key]
       access_token = oauth[:token]
-      token_secret = access_tokens[access_token]
+      token_secret = config.tokens[access_token]
 
       valid = SimpleOAuth::Header.new(
         request.request_method,

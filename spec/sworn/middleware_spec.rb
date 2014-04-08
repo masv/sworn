@@ -10,15 +10,19 @@ describe Sworn::Middleware do
   end
 
   def app
-    Sworn::Middleware.new dummy_app, :consumers => { "consumer" => "consumersecret" },
-                                     :access_tokens => { "token" => "tokensecret" },
-                                     :max_drift => 30, # seconds
-                                     :replay_check => lambda { |oauth|
-                                       @store ||= Set.new
-                                       return true if @store.include?(oauth)
-                                       @store << oauth
-                                       false
-                                     }
+    Sworn.configure do |config|
+      config.consumers    = { "consumer" => "consumersecret" }
+      config.tokens       = { "token" => "tokensecret" }
+      config.max_drift    = 30
+      config.replay_check = lambda { |oauth|
+                              @store ||= Set.new
+                              return true if @store.include?(oauth)
+                              @store << oauth
+                              false
+                            }
+    end
+
+    Sworn::Middleware.new dummy_app
   end
 
   def oauth_signature(options = {})
