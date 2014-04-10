@@ -8,16 +8,16 @@ module Sworn
 
     # A Proc that takes an OAuth options hash and returns true if the request
     # is replayed, and false if it is not
-    attr_accessor :replay_check
+    attr_accessor :replay_protector
 
     # A hash of access tokens and their secrets
     attr_accessor :tokens
 
     def initialize
-      @consumers    = Hash.new
-      @max_drift    = 30
-      @replay_check = lambda { |_| false }
-      @tokens       = Hash.new
+      @consumers        = Hash.new
+      @max_drift        = 30
+      @replay_protector = lambda { |_| false }
+      @tokens           = Hash.new
     end
   end
 end

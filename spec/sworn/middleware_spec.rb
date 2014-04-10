@@ -14,12 +14,12 @@ describe Sworn::Middleware do
       config.consumers    = { "consumer" => "consumersecret" }
       config.tokens       = { "token" => "tokensecret" }
       config.max_drift    = 30
-      config.replay_check = lambda { |oauth|
-                              @store ||= Set.new
-                              return true if @store.include?(oauth)
-                              @store << oauth
-                              false
-                            }
+      config.replay_protector = lambda { |oauth|
+                                  @store ||= Set.new
+                                  return true if @store.include?(oauth)
+                                  @store << oauth
+                                  false
+                                }
     end
 
     Sworn::Middleware.new dummy_app
