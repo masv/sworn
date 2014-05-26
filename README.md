@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/masv/ow.svg?branch=master)](https://travis-ci.org/masv/ow)
+[![Build Status](https://travis-ci.org/masv/sworn.svg?branch=master)](https://travis-ci.org/masv/sworn)
 [![Code Climate](https://codeclimate.com/github/masv/sworn.png)](https://codeclimate.com/github/masv/sworn)
 
 # Sworn
