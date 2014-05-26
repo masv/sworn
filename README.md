@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/masv/ow.svg?branch=master)](https://travis-ci.org/masv/ow)
+[![Code Climate](https://codeclimate.com/github/masv/sworn.png)](https://codeclimate.com/github/masv/sworn)
+
 # Sworn
 
 Sworn is Rack middleware to handle OAuth 1.0a signed requests.
