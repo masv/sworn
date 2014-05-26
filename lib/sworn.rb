@@ -2,6 +2,7 @@ require "sworn/configuration"
 require "sworn/middleware"
 require "sworn/replay_protector/custom"
 require "sworn/replay_protector/memory"
+require "sworn/replay_protector/redis"
 require "sworn/verifier"
 require "sworn/version"
 
