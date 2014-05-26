@@ -14,7 +14,7 @@ describe Sworn::Middleware do
       config.consumers    = { "consumer" => "consumersecret" }
       config.tokens       = { "token" => "tokensecret" }
       config.max_drift    = 30
-      config.replay_protector = lambda { |oauth|
+      config.replay_protector = Sworn::ReplayProtector::Custom, lambda { |oauth|
                                   @store ||= Set.new
                                   return true if @store.include?(oauth)
                                   @store << oauth

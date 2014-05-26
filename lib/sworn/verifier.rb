@@ -20,7 +20,7 @@ module Sworn
     end
 
     def replayed?
-      config.replay_protector.call(oauth)
+      config.replay_protector.replayed?(oauth)
     end
 
     def valid?

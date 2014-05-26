@@ -1,5 +1,6 @@
 require "sworn/configuration"
 require "sworn/middleware"
+require "sworn/replay_protector/custom"
 require "sworn/verifier"
 require "sworn/version"
 
