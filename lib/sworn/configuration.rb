@@ -19,10 +19,10 @@ module Sworn
     attr_accessor :tokens
 
     def initialize
-      @consumers        = Hash.new
-      @max_drift        = 30
-      @replay_protector = Sworn::ReplayProtector::Custom, lambda { |_| false }
-      @tokens           = Hash.new
+      self.consumers        = Hash.new
+      self.max_drift        = 30
+      self.tokens           = Hash.new
+      self.replay_protector = Sworn::ReplayProtector::Custom, lambda { |_| false }
     end
   end
 end
